@@ -89,9 +89,9 @@ export default function VersionHistory({ isOpen, onClose, note, onRestore, onCle
                                                 >
                                                     <div className="flex flex-col gap-4 pb-2">
                                                         <div className="max-h-[200px] overflow-y-auto border border-divider/50 rounded-lg p-2 bg-content2/50 relative">
-                                                            <div className="pointer-events-none select-none">
+                                                            <div>
                                                                 <TiptapEditor
-                                                                    content={version.content}
+                                                                    content={version.content || { type: 'doc', content: [] }}
                                                                     editable={false}
                                                                     // Force re-render per version to avoid stale content
                                                                     key={version.id}
