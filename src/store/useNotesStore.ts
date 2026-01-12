@@ -16,6 +16,8 @@ interface NotesState {
     saveVersion: (id: string) => void;
     restoreVersion: (id: string, versionId: string) => void;
     clearVersions: (id: string) => void;
+    applyRemoteUpdate: (noteId: string, content: any, updatedAt: number) => void;
+    removeNoteRemote: (noteId: string) => void;
     clearAllData: () => void;
 }
 
@@ -24,6 +26,29 @@ export const useNotesStore = create<NotesState>()(
         (set, get) => ({
             notes: [],
             activeNoteId: null,
+
+            applyRemoteUpdate: (noteId, content, updatedAt) => {
+                set((state) => ({
+                    notes: state.notes.map((note) =>
+                        note.id === noteId
+                            ? { ...note, content, updatedAt }
+                            : note
+                    ),
+                }));
+            },
+
+            removeNoteRemote: (noteId) => {
+                set((state) => {
+                    const newNotes = state.notes.filter((note) => note.id !== noteId);
+                    const newActiveId =
+                        state.activeNoteId === noteId ? null : state.activeNoteId;
+
+                    return {
+                        notes: newNotes,
+                        activeNoteId: newActiveId,
+                    };
+                });
+            },
 
             clearAllData: () => {
                 set({ notes: [], activeNoteId: null });

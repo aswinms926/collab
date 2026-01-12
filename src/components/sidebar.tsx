@@ -10,6 +10,7 @@ import {
 import { useNotesStore } from "@/store/useNotesStore";
 import { motion } from "framer-motion";
 import { Trash2 } from "lucide-react";
+import { collaborationManager } from "@/utils/collaboration";
 
 const DeleteIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg
@@ -67,6 +68,7 @@ export default function Sidebar() {
         e.preventDefault();
         if (confirm('Are you sure you want to delete this note?')) {
             deleteNote(id);
+            collaborationManager.broadcastDelete(id);
         }
     };
 
@@ -93,10 +95,11 @@ export default function Sidebar() {
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="text-center text-default-400 mt-10 px-2 py-8 rounded-xl border border-dashed border-default-200"
                     >
-                        <p className="font-medium">No notes yet</p>
-                        <p className="text-tiny mt-1">Create one to get started</p>
+                        <div className="text-center text-default-400 mt-10 px-2 py-8 rounded-xl border border-dashed border-default-200">
+                            <p className="font-medium">No notes yet</p>
+                            <p className="text-tiny mt-1">Create one to get started</p>
+                        </div>
                     </motion.div>
                 ) : (
                     <Listbox

@@ -1,11 +1,12 @@
 'use client';
 
 import { Button } from "@heroui/react";
-import { useCurrentEditor } from "@tiptap/react";
+import { useCurrentEditor, Editor } from "@tiptap/react";
 import { Bold, Italic, Code, List } from "lucide-react";
 
-export default function TiptapToolbar() {
-    const { editor } = useCurrentEditor();
+export default function TiptapToolbar({ editor: editorProp }: { editor?: Editor | null }) {
+    const { editor: contextEditor } = useCurrentEditor();
+    const editor = editorProp || contextEditor;
 
     if (!editor) {
         return null;

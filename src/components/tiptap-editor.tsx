@@ -33,30 +33,54 @@ interface TiptapEditorProps {
 }
 
 export default function TiptapEditor({ note, content, onChange, editable = true }: TiptapEditorProps) {
-    const initialContent = content || note?.content;
-    const editorKey = note?.id || "preview";
+    const editorContent = content || note?.content;
+    // We don't key the editor itself by ID, we let parent handle remounting if needed.
+    // Parent currently has key={note.id}, so this component remounts on note switch.
+
+    const editor = useEditor({
+        extensions,
+        content: editorContent,
+        editable,
+        immediatelyRender: false,
+        editorProps: {
+            attributes: {
+                class: `prose prose-sm sm:prose-base dark:prose-invert focus:outline-none min-h-[${editable ? '300px' : 'auto'}] max-w-none text-foreground leading-[1.8] font-normal`,
+            },
+        },
+        onUpdate: ({ editor }) => {
+            if (onChange) {
+                onChange(editor.getJSON());
+            }
+        },
+    });
+
+    // Content sync effect
+    useEffect(() => {
+        if (!editor || !editorContent) return;
+
+        const currentContent = editor.getJSON();
+        // Simple deep sync check
+        if (JSON.stringify(currentContent) !== JSON.stringify(editorContent)) {
+            // Save selection
+            const { from, to } = editor.state.selection;
+
+            // update content silently
+            editor.commands.setContent(editorContent, { emitUpdate: false });
+
+            // Attempt to restore selection (basic)
+            try {
+                editor.commands.setTextSelection({ from, to });
+            } catch (e) {
+                // If selection is invalid, ignore
+            }
+        }
+    }, [editor, editorContent]);
 
     return (
-        <EditorProvider
-            slotBefore={editable ? <TiptapToolbar /> : null}
-            extensions={extensions}
-            content={initialContent}
-            editable={editable}
-            immediatelyRender={false}
-            editorProps={{
-                attributes: {
-                    class: `prose prose-sm sm:prose-base dark:prose-invert focus:outline-none min-h-[${editable ? '300px' : 'auto'}] max-w-none text-foreground leading-[1.8] font-normal`,
-                }
-            }}
-            onUpdate={({ editor }) => {
-                if (onChange) {
-                    const json = editor.getJSON();
-                    onChange(json);
-                }
-            }}
-            key={editorKey}
-        >
-        </EditorProvider>
+        <div className="flex flex-col">
+            {editable && <TiptapToolbar editor={editor} />}
+            <EditorContent editor={editor} />
+        </div>
     );
 }
 
